@@ -5,6 +5,8 @@ services:
     build: ./frontend
     ports:
       - "3000:80"
+    environment:
+      - REACT_APP_GOOGLE_CLIENT_ID=your-google-client-id
 
   backend:
     build: ./backend

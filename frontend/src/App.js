@@ -2,9 +2,9 @@ import React from 'react';
 import { GoogleLogin } from 'react-google-login';
 import axios from 'axios';
 
-const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
-
 function App() {
+    const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+
     const onSuccess = (response) => {
         const { code } = response;
         axios.post("http://localhost:8080/auth/callback", { code }, { withCredentials: true })
