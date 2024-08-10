@@ -12,6 +12,9 @@ services:
       - "8080:8080"
     depends_on:
       - mongo
+    environment:
+      - GOOGLE_CLIENT_ID=your-google-client-id
+      - GOOGLE_CLIENT_SECRET=your-google-client-secret
 
   mongo:
     image: mongo:latest
