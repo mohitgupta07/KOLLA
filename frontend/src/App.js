@@ -1,36 +1,35 @@
 import React from 'react';
-import { GoogleLogin } from 'react-google-login';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 
 function App() {
     const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
-    const onSuccess = (response) => {
-        const { code } = response;
-        axios.post("http://localhost:8080/auth/callback", { code }, { withCredentials: true })
+    const onSuccess = (credentialResponse) => {
+        axios.post("http://localhost:8080/auth/callback", {
+            id_token: credentialResponse.credential
+        }, { withCredentials: true })
             .then(res => {
-                console.log("Login successful");
+                console.log("Login successful", res);
             })
             .catch(err => {
                 console.error("Login failed", err);
             });
     };
 
-    const onFailure = (response) => {
-        console.error("Login failed", response);
+    const onFailure = () => {
+        console.error("Login failed");
     };
 
     return (
-        <div className="App">
-            <GoogleLogin
-                clientId={clientId}
-                buttonText="Login with Google"
-                onSuccess={onSuccess}
-                onFailure={onFailure}
-                cookiePolicy={'single_host_origin'}
-                responseType="code"
-            />
-        </div>
+        <GoogleOAuthProvider clientId={clientId}>
+            <div className="App">
+                <GoogleLogin
+                    onSuccess={onSuccess}
+                    onError={onFailure}
+                />
+            </div>
+        </GoogleOAuthProvider>
     );
 }
 
