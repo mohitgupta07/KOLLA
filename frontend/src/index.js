@@ -1,20 +1,16 @@
-import './index.css'; // Global styles
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter as Router } from 'react-router-dom';
-import { GoogleOAuthProvider } from '@react-oauth/google';
-import { MetaOAuthProvider } from '@some/meta-auth-library'; // Hypothetical Meta provider
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import ProviderSelection from './ProviderSelection';
+import SignInPage from './SignInPage';
 import AppRouter from './AppRouter';
+import OAuthProviderWrapper from './OAuthProviderWrapper';
 import axios from 'axios';
-
-const appName = process.env.REACT_APP_APP_NAME || "MyApp";
-
-// Determine which OAuth provider to use
-const useGoogleProvider = true; // Example flag, can be set based on configuration or environment
 
 const Root = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [username, setUsername] = useState('');
+    const [provider, setProvider] = useState("google"); // Track selected provider
 
     useEffect(() => {
         axios.get('http://localhost:8080/auth/status', { withCredentials: true })
@@ -27,20 +23,30 @@ const Root = () => {
             });
     }, []);
 
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const selectedProvider = queryParams.get('provider');
+
+    useEffect(() => {
+        if (selectedProvider) {
+            setProvider(selectedProvider);
+        }
+    }, [selectedProvider]);
+
     return (
-        <Router>
-            {useGoogleProvider ? (
-                <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
-                    <AppRouter isLoggedIn={isLoggedIn} username={username} />
-                </GoogleOAuthProvider>
-            ) : (
-                <MetaOAuthProvider clientId={process.env.REACT_APP_META_CLIENT_ID}>
-                    <AppRouter isLoggedIn={isLoggedIn} username={username} />
-                </MetaOAuthProvider>
-            )}
-        </Router>
+        <OAuthProviderWrapper provider={provider}>
+            <Routes>
+                <Route path="/" element={<AppRouter isLoggedIn={isLoggedIn} username={username} />} />
+                <Route path="/select-provider" element={<ProviderSelection />} />
+                <Route path="/signin" element={<SignInPage />} />
+            </Routes>
+        </OAuthProviderWrapper>
     );
 };
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<Root />);
+root.render(
+    <Router>
+        <Root />
+    </Router>
+);
