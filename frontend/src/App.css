@@ -36,3 +36,18 @@
     transform: rotate(360deg);
   }
 }
+
+
+body {
+  background-color: #f0f2f5;
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.App {
+  text-align: center;
+}
+
+.MuiAppBar-root {
+  background-color: #1976d2;
+}
