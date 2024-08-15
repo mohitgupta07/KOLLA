@@ -1,40 +1,58 @@
-import React from 'react';
-import { Container, Typography, Box, Card, CardMedia, CardContent } from '@mui/material';
-import { GoogleLogin } from '@react-oauth/google';
+import React, { useState } from 'react';
+import GoogleSignInButton from './GoogleSignInButton';
+import { Container, Typography, Button, Box, Card, CardMedia, CardContent } from '@mui/material';
 import axios from 'axios';
 
 const appName = process.env.REACT_APP_APP_NAME || "MyApp";
 
-const HomePage = () => {
-    const onSuccess = (credentialResponse) => {
-        axios.post("http://localhost:8080/auth/callback", {
-            id_token: credentialResponse.credential
-        }, { withCredentials: true })
-            .then(res => {
-                console.log("Login successful", res);
-            })
-            .catch(err => {
-                console.error("Login failed", err);
-            });
+const App = () => {
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [username, setUsername] = useState('');
+
+    const handleLoginSuccess = (response) => {
+        setIsLoggedIn(true);
+        // Fetch user info or set username from response
+        setUsername('User'); // Replace with actual username from response
     };
 
-    const onFailure = () => {
-        console.error("Login failed");
+    const handleLoginFailure = () => {
+        setIsLoggedIn(false);
+    };
+
+    const handleLogout = () => {
+        axios.post('http://localhost:8080/auth/logout', {}, { withCredentials: true })
+            .then(() => {
+                setIsLoggedIn(false);
+                setUsername('');
+            })
+            .catch(err => console.error('Logout failed', err));
     };
 
     return (
         <Container maxWidth="md" sx={{ mt: 4, textAlign: 'center' }}>
-            <Typography variant="h4" gutterBottom>
+            <Typography variant="h3" gutterBottom>
                 Welcome to {appName}
             </Typography>
-            <GoogleLogin
-                onSuccess={onSuccess}
-                onError={onFailure}
-                style={{ margin: '20px 0' }}
-            />
-            <Typography variant="body1">
+            {!isLoggedIn ? (
+                <Box>
+                <GoogleSignInButton
+                    onSuccess={handleLoginSuccess}
+                    onFailure={handleLoginFailure}
+                    style={{ margin: '20px 0' }}
+                />
+                <Typography variant="body1">
                 Sign in with Google to access more features.
-            </Typography>
+                </Typography>
+            </Box>
+            ) : (
+                <Box>
+                    <Typography variant="h5">Hello, {username}</Typography>
+                    <Button onClick={handleLogout} variant="contained" color="primary">
+                        Logout
+                    </Button>
+                </Box>
+            )}
+
             <Box sx={{ mt: 4 }}>
                 <Card>
                     <CardMedia
@@ -54,4 +72,4 @@ const HomePage = () => {
     );
 };
 
-export default HomePage;
+export default App;
