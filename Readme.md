@@ -11,9 +11,10 @@ Setup Instructions
 To get the project up and running, follow these steps:
 
 1. Build and Start Containers
-bash
-Copy code
+```bash
 docker-compose up --build
+```
+
 Why This Command?
 This command is crucial for setting up your Docker environment.
 
@@ -22,17 +23,21 @@ docker-compose up: This command starts your application in a Docker environment 
 --build: This flag forces Docker to rebuild the images before starting the containers. It's especially useful when you've made changes to the Dockerfile or any of the dependencies that your services rely on. By rebuilding, you ensure that your containers are up-to-date with the latest changes.
 
 2. Clear npm Cache
-bash
-Copy code
+
+```
 npm cache clean --force
+```
+
 Why This Command?
 Over time, the npm cache can accumulate outdated or corrupted files, which might cause issues during installation of packages.
 
 npm cache clean --force: This command clears the npm cache by force, removing any cached data that could potentially interfere with the installation of your project’s dependencies. This step helps ensure that you start with a clean slate, reducing the risk of errors related to corrupted or outdated packages.
+
 3. Update npm to the Latest Version
-bash
-Copy code
+
+```
 npm install -g npm
+```
 Why This Command?
 Keeping your npm version up-to-date is important for several reasons:
 
