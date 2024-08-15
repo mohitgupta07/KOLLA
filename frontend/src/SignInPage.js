@@ -1,17 +1,17 @@
 import React from 'react';
 import { Container, Typography, Button, Box } from '@mui/material';
-import { GoogleLogin } from '@react-oauth/google';
+import GoogleSignInButton from './GoogleSignInButton';
 
 const SignInPage = () => {
-    const handleGoogleSuccess = (response) => {
-        console.log('Google Sign-In Success:', response);
-        // Handle Google Sign-In response
+    const handleLoginSuccess = (response) => {
+        console.log('Logged in successfully:', response);
+        // Handle post-login actions like redirecting the user
     };
 
-    const handleGoogleFailure = () => {
-        console.error('Google Sign-In Failed');
+    const handleLoginFailure = (error) => {
+        console.error('Login failed:', error);
+        // Handle login failure
     };
-
     const handleSocialSignIn = (provider) => {
         console.log(`Sign-In with ${provider}`);
         // Implement sign-in with other providers
@@ -22,11 +22,11 @@ const SignInPage = () => {
             <Typography variant="h4" gutterBottom>
                 Sign In
             </Typography>
-            <Box sx={{ mb: 2 }}>
-                <GoogleLogin
-                    onSuccess={handleGoogleSuccess}
-                    onError={handleGoogleFailure}
-                />
+            <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <Typography variant="h4" gutterBottom>
+                    Sign In
+                </Typography>
+                <GoogleSignInButton onSuccess={handleLoginSuccess} onFailure={handleLoginFailure} />
             </Box>
             <Button variant="outlined" color="primary" onClick={() => handleSocialSignIn('Twitter')} fullWidth sx={{ mb: 2 }}>
                 Sign In with Twitter
