@@ -1,11 +1,11 @@
 import React from 'react';
-import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
+import { Container, Typography, Box, Card, CardMedia, CardContent } from '@mui/material';
+import { GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
-import { AppBar, Toolbar, Typography, Button, Container, CssBaseline } from '@mui/material';
 
-function App() {
-    const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+const appName = process.env.REACT_APP_APP_NAME || "MyApp";
 
+const HomePage = () => {
     const onSuccess = (credentialResponse) => {
         axios.post("http://localhost:8080/auth/callback", {
             id_token: credentialResponse.credential
@@ -23,33 +23,35 @@ function App() {
     };
 
     return (
-        <GoogleOAuthProvider clientId={clientId}>
-            <CssBaseline />
-            <AppBar position="static">
-                <Toolbar>
-                    <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                        MyApp
-                    </Typography>
-                    <Button color="inherit">Home</Button>
-                    <Button color="inherit">About</Button>
-                    <Button color="inherit">Contact</Button>
-                </Toolbar>
-            </AppBar>
-            <Container maxWidth="sm" sx={{ mt: 4, textAlign: 'center' }}>
-                <Typography variant="h4" gutterBottom>
-                    Welcome to MyApp
-                </Typography>
-                <GoogleLogin
-                    onSuccess={onSuccess}
-                    onError={onFailure}
-                    style={{ margin: '20px 0' }}
-                />
-                <Typography variant="body1">
-                    Sign in with Google to access more features.
-                </Typography>
-            </Container>
-        </GoogleOAuthProvider>
+        <Container maxWidth="md" sx={{ mt: 4, textAlign: 'center' }}>
+            <Typography variant="h4" gutterBottom>
+                Welcome to {appName}
+            </Typography>
+            <GoogleLogin
+                onSuccess={onSuccess}
+                onError={onFailure}
+                style={{ margin: '20px 0' }}
+            />
+            <Typography variant="body1">
+                Sign in with Google to access more features.
+            </Typography>
+            <Box sx={{ mt: 4 }}>
+                <Card>
+                    <CardMedia
+                        component="img"
+                        height="140"
+                        image="https://via.placeholder.com/600x300"
+                        alt="Sample Image"
+                    />
+                    <CardContent>
+                        <Typography variant="body2" color="text.secondary">
+                            This is a sample image card.
+                        </Typography>
+                    </CardContent>
+                </Card>
+            </Box>
+        </Container>
     );
-}
+};
 
-export default App;
+export default HomePage;
