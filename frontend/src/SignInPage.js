@@ -19,14 +19,8 @@ const SignInPage = () => {
 
     return (
         <Container maxWidth="sm" sx={{ mt: 4 }}>
-            <Typography variant="h4" gutterBottom>
-                Sign In
-            </Typography>
             <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <Typography variant="h4" gutterBottom>
-                    Sign In
-                </Typography>
-                <GoogleSignInButton onSuccess={handleLoginSuccess} onFailure={handleLoginFailure} />
+                <GoogleSignInButton  />
             </Box>
             <Button variant="outlined" color="primary" onClick={() => handleSocialSignIn('Twitter')} fullWidth sx={{ mb: 2 }}>
                 Sign In with Twitter

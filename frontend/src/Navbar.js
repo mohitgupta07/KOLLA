@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppBar, Toolbar, Typography, Button } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, Hidden } from '@mui/material';
 import { Link } from 'react-router-dom';
 
 const Navbar = ({ isLoggedIn, username }) => (
@@ -9,18 +9,19 @@ const Navbar = ({ isLoggedIn, username }) => (
                 {process.env.REACT_APP_APP_NAME || "MyApp"}
                 {isLoggedIn && ` - Kolla, ${username}!`}
             </Typography>
-            <Button component={Link} to="/" color="inherit">Home</Button>
-            <Button component={Link} to="/about" color="inherit">About</Button>
-            <Button component={Link} to="/contact" color="inherit">Contact</Button>
-            {isLoggedIn ? (
-                <>
-                    <Button component={Link} to="/dashboard" color="inherit">Dashboard</Button>
-                    <Button component={Link} to="/settings" color="inherit">Settings</Button>
-                    {/* <Button component={Link} to="/logout" color="inherit">Logout</Button> */}
-                </>
-            ) : (
-                <Button component={Link} to="/signin" color="inherit">Sign In</Button>
-            )}
+            <Hidden xsDown>
+                <Button component={Link} to="/" color="inherit">Home</Button>
+                <Button component={Link} to="/about" color="inherit">About</Button>
+                <Button component={Link} to="/contact" color="inherit">Contact</Button>
+                {isLoggedIn ? (
+                    <>
+                        <Button component={Link} to="/dashboard" color="inherit">Dashboard</Button>
+                        <Button component={Link} to="/settings" color="inherit">Settings</Button>
+                    </>
+                ) : (
+                    <Button component={Link} to="/signin" color="inherit">Sign In</Button>
+                )}
+            </Hidden>
         </Toolbar>
     </AppBar>
 );
