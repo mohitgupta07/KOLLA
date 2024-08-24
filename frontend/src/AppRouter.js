@@ -18,6 +18,7 @@ const AppRouter = ({ isLoggedIn, username}) => (
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/signin" element={<SignInPage />} />
             <Route path="/auth/callback" element={<GoogleCallback />} />
+            <Route path="/dashboard" element={<App />} />
             {isLoggedIn && <Route path="/settings" element={<SettingsPage />} />}
         </Routes>
         <Footer />

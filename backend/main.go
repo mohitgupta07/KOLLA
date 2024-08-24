@@ -40,6 +40,7 @@ func main() {
 	http.HandleFunc("/auth/google/login", handleGoogleLogin)
 	http.HandleFunc("/auth/google/callback", handleGoogleCallback)
 	http.HandleFunc("/dashboard", protectedEndpoint)
+	http.HandleFunc("/logout", logout)
 
 	fmt.Println("Server started at http://localhost:8080")
 	http.ListenAndServe(":8080", nil)
@@ -122,6 +123,7 @@ func createJWT(userID string) (string, error) {
 }
 
 func protectedEndpoint(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Protected endpoint hit")
 	// Get JWT from cookie
 	cookie, err := r.Cookie("auth_token")
 	if err != nil {
@@ -147,4 +149,16 @@ func verifyJWT(tokenString string) (*jwt.Token, error) {
 		}
 		return jwtKey, nil
 	})
+}
+
+func logout(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "auth_token",
+		Value:    "",
+		Expires:  time.Now().Add(-1 * time.Hour),
+		HttpOnly: true,
+		Secure:   false, // Set to true in production
+		Path:     "/",
+	})
+	w.WriteHeader(http.StatusOK)
 }

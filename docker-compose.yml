@@ -6,7 +6,7 @@ services:
     ports:
       - "3000:80"
     environment:
-      - REACT_APP_GOOGLE_CLIENT_ID=your-google-client-id
+      - REACT_APP_GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
 
   backend:
     build: ./backend
@@ -15,9 +15,8 @@ services:
     depends_on:
       - mongo
     environment:
-      - GOOGLE_CLIENT_ID=your-google-client-id
-      - GOOGLE_CLIENT_SECRET=your-google-client-secret
-
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
   mongo:
     image: mongo:latest
     ports:

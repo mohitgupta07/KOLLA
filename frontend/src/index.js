@@ -16,14 +16,9 @@ const Root = () => {
     const [username, setUsername] = useState('');
 
     useEffect(() => {
-        axios.get('http://localhost:8080/auth/status', { withCredentials: true })
-            .then(response => {
-                setIsLoggedIn(response.data.isLoggedIn);
-                setUsername(response.data.username);
-            })
-            .catch(() => {
-                setIsLoggedIn(false);
-            });
+        // Check if the user is logged by checking the cookie set by the backend in the browser
+        
+
     }, []);
 
     return (
