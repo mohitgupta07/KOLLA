@@ -70,7 +70,7 @@ func main() {
 	mux.HandleFunc("/auth/google/callback", handleGoogleCallback)
 	mux.HandleFunc("/dashboard", protectedEndpoint)
 	mux.HandleFunc("/user", getUser)
-	mux.HandleFunc("/logout", logout)
+	mux.HandleFunc("/auth/logout", logout)
 
 	fmt.Println("Server started at http://localhost:8080")
 	handler := corsMiddleware(mux)
@@ -183,6 +183,9 @@ func verifyJWT(tokenString string) (*jwt.Token, error) {
 }
 
 func logout(w http.ResponseWriter, r *http.Request) {
+	// Clear JWT cookie to log out
+	// print out the user that is logging out
+	fmt.Println("Logging out user")
 	http.SetCookie(w, &http.Cookie{
 		Name:     "auth_token",
 		Value:    "",

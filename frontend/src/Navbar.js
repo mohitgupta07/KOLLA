@@ -7,6 +7,7 @@ const Navbar = ({ isLoggedIn, username }) => (
         <Toolbar>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
                 {process.env.REACT_APP_APP_NAME || "MyApp"}
+                {isLoggedIn && ` - Kolla, ${username}!`}
             </Typography>
             <Button component={Link} to="/" color="inherit">Home</Button>
             <Button component={Link} to="/about" color="inherit">About</Button>
@@ -14,10 +15,8 @@ const Navbar = ({ isLoggedIn, username }) => (
             <Button component={Link} to="/dashboard" color="inherit">Dashboard</Button>
             {isLoggedIn ? (
                 <>
-                    <Typography variant="body1" sx={{ mr: 2 }}>
-                        Hello, {username}
-                    </Typography>
                     <Button component={Link} to="/settings" color="inherit">Settings</Button>
+                    {/* <Button component={Link} to="/logout" color="inherit">Logout</Button> */}
                 </>
             ) : (
                 <Button component={Link} to="/signin" color="inherit">Sign In</Button>

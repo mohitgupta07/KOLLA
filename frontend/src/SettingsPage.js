@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Typography, TextField, Button, Box } from '@mui/material';
 import axios from 'axios';
+import Logout from './Logout';
 
 const SettingsPage = () => {
     const [userData, setUserData] = useState({
@@ -66,6 +67,7 @@ const SettingsPage = () => {
             </form>
             {successMessage && <Typography color="green" sx={{ mt: 2 }}>{successMessage}</Typography>}
             {errorMessage && <Typography color="red" sx={{ mt: 2 }}>{errorMessage}</Typography>}
+            <Box sx={{ mt: 2 }}>  <Logout />  </Box>
         </Container>
     );
 };

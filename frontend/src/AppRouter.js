@@ -10,6 +10,7 @@ import Navbar from './Navbar';
 import GoogleCallback from './GoogleCallback';
 import Dashboard from './Dashboard';
 import { AuthContext } from './AuthProvider';
+import Logout from './Logout';
 
 const AppRouter = () => {
     const { isLoggedIn, username } = useContext(AuthContext);
@@ -23,8 +24,9 @@ const AppRouter = () => {
                 <Route path="/contact" element={<ContactPage />} />
                 <Route path="/signin" element={<SignInPage />} />
                 <Route path="/auth/callback" element={<GoogleCallback />} />
-                <Route path="/dashboard" element={<Dashboard />} />
                 {isLoggedIn && <Route path="/settings" element={<SettingsPage />} />}
+                {isLoggedIn && <Route path="/dashboard" element={<Dashboard />} />}
+                {isLoggedIn && <Route path="/logout" element={<Logout />} />}
             </Routes>
             <Footer />
         </>
