@@ -37,6 +37,8 @@ type GoogleUserInfo struct {
 }
 
 func main() {
+	fmt.Println("Starting server...")
+	fmt.Println("Google Client ID: ", googleOauthConfig.ClientID)
 	http.HandleFunc("/auth/google/login", handleGoogleLogin)
 	http.HandleFunc("/auth/google/callback", handleGoogleCallback)
 	http.HandleFunc("/dashboard", protectedEndpoint)
@@ -88,7 +90,7 @@ func handleGoogleCallback(w http.ResponseWriter, r *http.Request) {
 	})
 
 	// Redirect back to the frontend
-	http.Redirect(w, r, "http://localhost:3000/dashboard", http.StatusSeeOther)
+	http.Redirect(w, r, "http://localhost:3000/auth/callback", http.StatusSeeOther)
 }
 
 func getUserInfo(token *oauth2.Token) (*GoogleUserInfo, error) {

@@ -10,7 +10,7 @@ import Navbar from './Navbar';
 import GoogleCallback from './GoogleCallback';
 import Dashboard from './Dashboard';
 
-const AppRouter = ({ isLoggedIn, username}) => (
+const AppRouter = ({ isLoggedIn, username }) => (
     <>
         <Navbar isLoggedIn={isLoggedIn} username={username} />
         <Routes>

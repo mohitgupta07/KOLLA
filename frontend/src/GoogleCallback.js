@@ -18,6 +18,7 @@ function GoogleCallbackFrontend() {
       })
         .then((response) => response.json())
         .then((data) => {
+          console.log('Success:', data);
           if (data.token) {
             localStorage.setItem('authToken', data.token); // Store token in local storage
             navigate('/dashboard'); // Redirect to your dashboard or another protected route
