@@ -12,9 +12,9 @@ const Navbar = ({ isLoggedIn, username }) => (
             <Button component={Link} to="/" color="inherit">Home</Button>
             <Button component={Link} to="/about" color="inherit">About</Button>
             <Button component={Link} to="/contact" color="inherit">Contact</Button>
-            <Button component={Link} to="/dashboard" color="inherit">Dashboard</Button>
             {isLoggedIn ? (
                 <>
+                    <Button component={Link} to="/dashboard" color="inherit">Dashboard</Button>
                     <Button component={Link} to="/settings" color="inherit">Settings</Button>
                     {/* <Button component={Link} to="/logout" color="inherit">Logout</Button> */}
                 </>

@@ -1,86 +1,44 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import {jwtDecode} from 'jwt-decode';
+import React, { useContext } from 'react';
+import { AuthContext } from './AuthProvider';
+import { Box, Card, CardContent, CardMedia, Typography, Grid } from '@mui/material';
 
 const Dashboard = () => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [userInfo, setUserInfo] = useState(null);
-    const navigate = useNavigate();
+    const { isLoggedIn } = useContext(AuthContext);
 
-    useEffect(() => {
-        const checkAuthStatus = async () => {
-            const token = getCookie('auth_token');
-            if (token) {
-                try {
-                    // Decode token to get expiration and other claims
-                    const decodedToken = jwtDecode(token);
-                    const isExpired = decodedToken.exp * 1000 < Date.now();
-
-                    if (!isExpired) {
-                        // Optionally validate the token with the backend
-                        const response = await fetch('/api/check-auth', {
-                            method: 'GET',
-                            credentials: 'include', // Include cookies in the request
-                        });
-
-                        if (response.ok) {
-                            const data = await response.json();
-                            setIsAuthenticated(true);
-                            setUserInfo(data); // Set user info from backend
-                        } else {
-                            setIsAuthenticated(false);
-                            setUserInfo(null);
-                        }
-                    } else {
-                        setIsAuthenticated(false);
-                        setUserInfo(null);
-                    }
-                } catch (error) {
-                    console.error('Token validation error:', error);
-                    setIsAuthenticated(false);
-                    setUserInfo(null);
-                }
-            } else {
-                setIsAuthenticated(false);
-                setUserInfo(null);
-            }
-        };
-
-        checkAuthStatus();
-    }, []);
-
-    const handleLogout = async () => {
-        try {
-            await fetch('/api/logout', {
-                method: 'POST',
-                credentials: 'include', // Include cookies in the request
-            });
-            setIsAuthenticated(false);
-            setUserInfo(null);
-            navigate('/'); // Redirect to login or home page
-        } catch (error) {
-            console.error('Failed to logout:', error);
-        }
-    };
-
-    const getCookie = (name) => {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
-    };
+    // Sample data for cards
+    const cards = [
+        { id: 1, title: 'Card 1', image: 'https://via.placeholder.com/600x300' },
+        { id: 2, title: 'Card 2', image: 'https://via.placeholder.com/600x300' },
+        { id: 3, title: 'Card 3', image: 'https://via.placeholder.com/600x300' },
+        // Add more cards as needed
+    ];
 
     return (
-        <div>
-            <h1>Dashboard</h1>
-            {isAuthenticated ? (
-                <div>
-                    <h2>Welcome, {userInfo ? userInfo.name : 'User'}!</h2>
-                    <button onClick={handleLogout}>Logout</button>
-                </div>
+        <Box sx={{ mt: 4 }}>
+            {isLoggedIn ? (
+                <Grid container spacing={2}>
+                    {cards.map((card) => (
+                        <Grid item xs={12} sm={6} md={4} key={card.id}>
+                            <Card>
+                                <CardMedia
+                                    component="img"
+                                    height="140"
+                                    image={card.image}
+                                    alt={card.title}
+                                />
+                                <CardContent>
+                                    <Typography variant="body2" color="text.secondary">
+                                        {card.title}
+                                    </Typography>
+                                </CardContent>
+                            </Card>
+                        </Grid>
+                    ))}
+                </Grid>
             ) : (
                 <p>Please log in to access this page.</p>
             )}
-        </div>
+        </Box>
     );
 };
 

@@ -8,7 +8,7 @@ export const AuthProvider = ({ children }) => {
     const [username, setUsername] = useState('');
 
     const logout = useCallback(() => {
-        axios.post('http://localhost:8080/auth/logout', {}, { withCredentials: true })
+        return axios.post('http://localhost:8080/auth/logout', {}, { withCredentials: true })
             .then(() => {
                 setIsLoggedIn(false);
                 setUsername('');

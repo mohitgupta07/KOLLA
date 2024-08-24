@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Typography, TextField, Button, Box } from '@mui/material';
 import axios from 'axios';
-import Logout from './Logout';
+import { useNavigate } from 'react-router-dom';
 
 const SettingsPage = () => {
     const [userData, setUserData] = useState({
@@ -10,6 +10,7 @@ const SettingsPage = () => {
     });
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const navigate = useNavigate();
 
     useEffect(() => {
         // Fetch user data when component mounts
@@ -34,6 +35,10 @@ const SettingsPage = () => {
             .catch(error => {
                 setErrorMessage('Error updating profile.');
             });
+    };
+
+    const handleLogout = () => {
+        navigate('/logout');
     };
 
     return (
@@ -67,7 +72,11 @@ const SettingsPage = () => {
             </form>
             {successMessage && <Typography color="green" sx={{ mt: 2 }}>{successMessage}</Typography>}
             {errorMessage && <Typography color="red" sx={{ mt: 2 }}>{errorMessage}</Typography>}
-            <Box sx={{ mt: 2 }}>  <Logout />  </Box>
+            <Box sx={{ mt: 2 }}>
+                <Button onClick={handleLogout} variant="contained" color="primary">
+                    Logout
+                </Button>
+            </Box>
         </Container>
     );
 };
