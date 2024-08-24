@@ -8,6 +8,7 @@ import SettingsPage from './SettingsPage';
 import Footer from './Footer';
 import Navbar from './Navbar';
 import GoogleCallback from './GoogleCallback';
+import Dashboard from './Dashboard';
 
 const AppRouter = ({ isLoggedIn, username}) => (
     <>
@@ -18,7 +19,7 @@ const AppRouter = ({ isLoggedIn, username}) => (
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/signin" element={<SignInPage />} />
             <Route path="/auth/callback" element={<GoogleCallback />} />
-            <Route path="/dashboard" element={<App />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             {isLoggedIn && <Route path="/settings" element={<SettingsPage />} />}
         </Routes>
         <Footer />
