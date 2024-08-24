@@ -31,7 +31,7 @@ const App = () => {
     return (
         <Container maxWidth="md" sx={{ mt: 4, textAlign: 'center' }}>
             <Typography variant="h3" gutterBottom>
-                Welcome to {appName}
+                Welcome to {appName}!
             </Typography>
             {!isLoggedIn ? (
                 <Box>

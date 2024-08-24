@@ -1,27 +1,31 @@
 import React from 'react';
-import { GoogleLogin } from '@react-oauth/google';
-import axios from 'axios';
 
-const GoogleSignInButton = ({ onSuccess, onFailure }) => {
-    const handleSuccess = (credentialResponse) => {
-        axios.post("http://localhost:8080/auth/callback", {
-            id_token: credentialResponse.credential
-        }, { withCredentials: true })
-            .then(res => onSuccess(res))
-            .catch(err => onFailure(err));
-    };
+const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+const REDIRECT_URI = 'http://localhost:3000/auth/callback';
 
-    const handleFailure = () => {
-        console.error("Login failed");
-        onFailure();
-    };
+function GoogleSignInFrontEnd() {
+  const handleGoogleSignIn = () => {
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=openid%20email%20profile`;
+    window.location.href = authUrl;
+  };
 
-    return (
-        <GoogleLogin
-            onSuccess={handleSuccess}
-            onError={handleFailure}
-        />
-    );
-};
+  return (
+    <button onClick={handleGoogleSignIn}>
+      Sign in with Google
+    </button>
+  );
+}
 
-export default GoogleSignInButton;
+function GoogleSignIn() {
+  const handleGoogleSignIn = () => {
+    window.location.href = 'http://localhost:8080/auth/google/login';
+  };
+
+  return (
+    <button onClick={handleGoogleSignIn}>
+      Sign in with Google
+    </button>
+  );
+}
+
+export default GoogleSignIn;

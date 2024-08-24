@@ -1,146 +1,150 @@
 package main
 
 import (
-	"context"
-	"log"
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/gorilla/mux"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )
 
-var (
-	jwtKey            = []byte("your_secret_key")
-	googleOauthConfig = &oauth2.Config{
-		RedirectURL:  "http://localhost:8080/callback",
-		ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
-		ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
-		Scopes:       []string{"profile", "email"},
-		Endpoint:     google.Endpoint,
-	}
-	oauth2Token *oauth2.Token
-)
+var googleOauthConfig = &oauth2.Config{
+	ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
+	ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
+	RedirectURL:  "http://localhost:8080/auth/google/callback",
+	Scopes: []string{
+		"https://www.googleapis.com/auth/userinfo.email",
+		"https://www.googleapis.com/auth/userinfo.profile",
+	},
+	Endpoint: google.Endpoint,
+}
 
-type Claims struct {
-	Email string `json:"email"`
-	jwt.StandardClaims
+var jwtKey = []byte("your-secret-key")
+
+type GoogleUserInfo struct {
+	ID            string `json:"id"`
+	Email         string `json:"email"`
+	VerifiedEmail bool   `json:"verified_email"`
+	Name          string `json:"name"`
+	GivenName     string `json:"given_name"`
+	FamilyName    string `json:"family_name"`
+	Picture       string `json:"picture"`
+	Locale        string `json:"locale"`
 }
 
 func main() {
-	router := mux.NewRouter()
+	http.HandleFunc("/auth/google/login", handleGoogleLogin)
+	http.HandleFunc("/auth/google/callback", handleGoogleCallback)
+	http.HandleFunc("/dashboard", protectedEndpoint)
 
-	router.HandleFunc("/auth", handleAuth)
-	router.HandleFunc("/callback", handleCallback)
-	router.HandleFunc("/data", handleData).Methods("GET", "POST", "PUT")
-	router.HandleFunc("/generate-pdf", handleGeneratePDF).Methods("POST")
-	http.Handle("/", router)
-	log.Println("Server started at :8080")
-	http.ListenAndServe(":8080", router)
+	fmt.Println("Server started at http://localhost:8080")
+	http.ListenAndServe(":8080", nil)
 }
 
-func handleAuth(w http.ResponseWriter, r *http.Request) {
+func handleGoogleLogin(w http.ResponseWriter, r *http.Request) {
+	// Redirect user to Google's consent page
 	url := googleOauthConfig.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
-func handleCallback(w http.ResponseWriter, r *http.Request) {
+func handleGoogleCallback(w http.ResponseWriter, r *http.Request) {
+	// Get the authorization code from the query parameters
 	code := r.URL.Query().Get("code")
-	token, err := googleOauthConfig.Exchange(context.Background(), code)
+
+	// Exchange the authorization code for an access token
+	token, err := googleOauthConfig.Exchange(oauth2.NoContext, code)
 	if err != nil {
-		log.Fatal(err)
+		http.Error(w, "Failed to exchange token: "+err.Error(), http.StatusInternalServerError)
+		return
 	}
-	oauth2Token = token
-	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+
+	// Retrieve user information from Google
+	userInfo, err := getUserInfo(token)
+	if err != nil {
+		http.Error(w, "Failed to get user info: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Generate JWT
+	jwtToken, err := createJWT(userInfo.ID)
+	if err != nil {
+		http.Error(w, "Failed to create JWT: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Set JWT as an HTTP-only cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:     "auth_token",
+		Value:    jwtToken,
+		Expires:  time.Now().Add(24 * time.Hour),
+		HttpOnly: true,
+		Secure:   false, // Set to true in production to ensure it's sent over HTTPS
+		Path:     "/",
+	})
+
+	// Redirect back to the frontend
+	http.Redirect(w, r, "http://localhost:3000/dashboard", http.StatusSeeOther)
 }
 
-// func handleGoogleLogin(w http.ResponseWriter, r *http.Request) {
-// 	url := googleOauthConfig.AuthCodeURL("randomstate")
-// 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
-// }
-
-// func handleGoogleCallback(w http.ResponseWriter, r *http.Request) {
-// 	code := r.URL.Query().Get("code")
-// 	token, err := googleOauthConfig.Exchange(context.Background(), code)
-// 	if err != nil {
-// 		http.Error(w, "Failed to exchange token", http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	oauth2Service, err := oauth2.NewService(context.Background(), oauth2.TokenSource(token))
-// 	if err != nil {
-// 		http.Error(w, "Failed to create OAuth2 service", http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	userInfo, err := oauth2Service.Userinfo.Get().Do()
-// 	if err != nil {
-// 		http.Error(w, "Failed to get user info", http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	// Create JWT token
-// 	expirationTime := time.Now().Add(24 * time.Hour)
-// 	claims := &Claims{
-// 		Email: userInfo.Email,
-// 		StandardClaims: jwt.StandardClaims{
-// 			ExpiresAt: expirationTime.Unix(),
-// 		},
-// 	}
-
-// 	tokenString, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(jwtKey)
-// 	if err != nil {
-// 		http.Error(w, "Failed to create JWT", http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	http.SetCookie(w, &http.Cookie{
-// 		Name:    "token",
-// 		Value:   tokenString,
-// 		Expires: expirationTime,
-// 	})
-
-// 	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
-// }
-
-func handleData(w http.ResponseWriter, r *http.Request) {
-	// Check JWT token
-	cookie, err := r.Cookie("token")
+func getUserInfo(token *oauth2.Token) (*GoogleUserInfo, error) {
+	// Google API endpoint to get user info
+	response, err := http.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + token.AccessToken)
 	if err != nil {
-		if err == http.ErrNoCookie {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
-		}
-		http.Error(w, "Bad request", http.StatusBadRequest)
-		return
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	userInfo := &GoogleUserInfo{}
+	err = json.NewDecoder(response.Body).Decode(userInfo)
+	if err != nil {
+		return nil, err
 	}
 
-	tokenStr := cookie.Value
-	claims := &Claims{}
+	return userInfo, nil
+}
 
-	token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
-		return jwtKey, nil
+func createJWT(userID string) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"user_id": userID,
+		"exp":     time.Now().Add(time.Hour * 24).Unix(),
 	})
+
+	tokenString, err := token.SignedString(jwtKey)
 	if err != nil {
-		if err == jwt.ErrSignatureInvalid {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
-		}
-		http.Error(w, "Bad request", http.StatusBadRequest)
-		return
+		return "", err
 	}
-	if !token.Valid {
+
+	return tokenString, nil
+}
+
+func protectedEndpoint(w http.ResponseWriter, r *http.Request) {
+	// Get JWT from cookie
+	cookie, err := r.Cookie("auth_token")
+	if err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
-	// Handle data operations
-	// ...
+	// Verify JWT
+	token, err := verifyJWT(cookie.Value)
+	if err != nil || !token.Valid {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	// Respond with protected content
+	w.Write([]byte("Welcome to your dashboard!"))
 }
 
-func handleGeneratePDF(w http.ResponseWriter, r *http.Request) {
-	// Check JWT token (similar to handleData)
-	// Handle PDF generation
+func verifyJWT(tokenString string) (*jwt.Token, error) {
+	return jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+		return jwtKey, nil
+	})
 }
