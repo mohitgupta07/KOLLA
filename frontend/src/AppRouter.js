@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import App from './App';
 import AboutPage from './AboutPage';
@@ -9,21 +9,26 @@ import Footer from './Footer';
 import Navbar from './Navbar';
 import GoogleCallback from './GoogleCallback';
 import Dashboard from './Dashboard';
+import { AuthContext } from './AuthProvider';
 
-const AppRouter = ({ isLoggedIn, username }) => (
-    <>
-        <Navbar isLoggedIn={isLoggedIn} username={username} />
-        <Routes>
-            <Route path="/" element={<App />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/signin" element={<SignInPage />} />
-            <Route path="/auth/callback" element={<GoogleCallback />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            {isLoggedIn && <Route path="/settings" element={<SettingsPage />} />}
-        </Routes>
-        <Footer />
-    </>
-);
+const AppRouter = () => {
+    const { isLoggedIn, username } = useContext(AuthContext);
+
+    return (
+        <>
+            <Navbar isLoggedIn={isLoggedIn} username={username} />
+            <Routes>
+                <Route path="/" element={<App />} />
+                <Route path="/about" element={<AboutPage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route path="/signin" element={<SignInPage />} />
+                <Route path="/auth/callback" element={<GoogleCallback />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                {isLoggedIn && <Route path="/settings" element={<SettingsPage />} />}
+            </Routes>
+            <Footer />
+        </>
+    );
+};
 
 export default AppRouter;

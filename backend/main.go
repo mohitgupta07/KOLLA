@@ -36,16 +36,45 @@ type GoogleUserInfo struct {
 	Locale        string `json:"locale"`
 }
 
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+	(*w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	(*w).Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+}
+
+func corsMiddleware(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Set headers
+		w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+
+		// If it's a preflight request, respond with 200
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		// Pass the request to the next middleware in chain
+		handler.ServeHTTP(w, r)
+	})
+}
 func main() {
+	mux := http.NewServeMux()
+	// enable CORS
+
 	fmt.Println("Starting server...")
 	fmt.Println("Google Client ID: ", googleOauthConfig.ClientID)
-	http.HandleFunc("/auth/google/login", handleGoogleLogin)
-	http.HandleFunc("/auth/google/callback", handleGoogleCallback)
-	http.HandleFunc("/dashboard", protectedEndpoint)
-	http.HandleFunc("/logout", logout)
+	mux.HandleFunc("/auth/google/login", handleGoogleLogin)
+	mux.HandleFunc("/auth/google/callback", handleGoogleCallback)
+	mux.HandleFunc("/dashboard", protectedEndpoint)
+	mux.HandleFunc("/user", getUser)
+	mux.HandleFunc("/logout", logout)
 
 	fmt.Println("Server started at http://localhost:8080")
-	http.ListenAndServe(":8080", nil)
+	handler := corsMiddleware(mux)
+	http.ListenAndServe(":8080", handler)
 }
 
 func handleGoogleLogin(w http.ResponseWriter, r *http.Request) {
@@ -163,4 +192,65 @@ func logout(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 	})
 	w.WriteHeader(http.StatusOK)
+}
+
+////////////////////////////////////////
+// user endpoint authentication
+////////////////////////////////////////
+
+func getUser(w http.ResponseWriter, r *http.Request) {
+	// Enable CORS
+	// enableCors(&w)
+	// Get JWT from cookie
+	cookie, err := r.Cookie("auth_token")
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	// Verify JWT
+	token, err := verifyJWT(cookie.Value)
+	if err != nil || !token.Valid {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	userID := claims["user_id"].(string)
+	fmt.Println("User ID:", userID)
+
+	// Retrieve user information from your database using the userID
+	// For this example, let's assume you have a function getUserInfoFromDB that takes a userID and returns a User struct
+	user, err := getUserInfoFromDB(userID)
+	if err != nil {
+		http.Error(w, "Failed to get user info: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Respond with user information
+	json.NewEncoder(w).Encode(user)
+	// update http response with 200 status code if encoding is successful
+	w.WriteHeader(http.StatusOK)
+}
+
+func getUserInfoFromDB(userID string) (*User, error) {
+	// This is a placeholder function that simulates fetching user information from a database
+	// In a real application, you would query your database to retrieve the user information
+	// For this example, we'll just return a hardcoded user
+	return &User{
+		ID:    userID,
+		Name:  "John Doe",
+		Email: "",
+	}, nil
+}
+
+type User struct {
+	ID    string `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
 }
