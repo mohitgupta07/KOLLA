@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AppBar, Toolbar, Typography, IconButton, Drawer, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
+import { AppBar, Toolbar, Typography, IconButton, Drawer, List, ListItem, ListItemIcon, ListItemText, Hidden, Button } from '@mui/material';
 import { Link } from 'react-router-dom';
 import MenuIcon from '@mui/icons-material/Menu';
 import HomeIcon from '@mui/icons-material/Home';
@@ -73,18 +73,34 @@ const Navbar = ({ isLoggedIn, username }) => {
                     {process.env.REACT_APP_APP_NAME || "MyApp"}
                     {isLoggedIn && ` - Kolla, ${username}!`}
                 </Typography>
+                <Hidden smDown>
+                    <Button component={Link} to="/" color="inherit">Home</Button>
+                    <Button component={Link} to="/about" color="inherit">About</Button>
+                    <Button component={Link} to="/contact" color="inherit">Contact</Button>
+                    {isLoggedIn ? (
+                        <>
+                            <Button component={Link} to="/dashboard" color="inherit">Dashboard</Button>
+                            <Button component={Link} to="/settings" color="inherit">Settings</Button>
+                            <Button component={Link} to="/logout" color="inherit">Logout</Button>
+                        </>
+                    ) : (
+                        <Button component={Link} to="/signin" color="inherit">Sign In</Button>
+                    )}
+                </Hidden>
             </Toolbar>
             <nav>
-                <Drawer
-                    variant="temporary"
-                    open={mobileOpen}
-                    onClose={handleDrawerToggle}
-                    ModalProps={{
-                        keepMounted: true, // Better open performance on mobile.
-                    }}
-                >
-                    {drawer}
-                </Drawer>
+                <Hidden mdUp>
+                    <Drawer
+                        variant="temporary"
+                        open={mobileOpen}
+                        onClose={handleDrawerToggle}
+                        ModalProps={{
+                            keepMounted: true, // Better open performance on mobile.
+                        }}
+                    >
+                        {drawer}
+                    </Drawer>
+                </Hidden>
             </nav>
         </AppBar>
     );
