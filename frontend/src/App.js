@@ -2,9 +2,7 @@ import React, { useContext } from 'react';
 import { AuthContext } from './AuthProvider';
 import GoogleSignInButton from './GoogleSignInButton';
 import { Container, Typography, Button, Box, Card, CardMedia, CardContent } from '@mui/material';
-import axios from 'axios';
-
-const appName = process.env.REACT_APP_APP_NAME || "MyApp";
+import { appName } from './ConfigInfo';
 
 const App = () => {
     const { isLoggedIn, username } = useContext(AuthContext);
@@ -18,7 +16,7 @@ const App = () => {
             </Typography>
             {!isLoggedIn ? (
                 <Box>
-                <GoogleSignInButton
+                <GoogleSignInButton  
                     style={{ margin: '20px 0' }}
                 />
                 <Typography variant="body1">

@@ -1,7 +1,5 @@
 import React from 'react';
-
-const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
-const REDIRECT_URI = 'http://localhost:3000/auth/callback';
+import { GOOGLE_CLIENT_ID, REDIRECT_URI, API_URL } from './ConfigInfo';
 
 function GoogleSignInFrontEnd() {
   const handleGoogleSignIn = () => {
@@ -18,7 +16,8 @@ function GoogleSignInFrontEnd() {
 
 function GoogleSignIn() {
   const handleGoogleSignIn = () => {
-    window.location.href = 'http://localhost:8080/auth/google/login';
+    
+    window.location.href = API_URL + '/auth/google/login';
   };
 
   return (
